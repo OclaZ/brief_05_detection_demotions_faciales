@@ -19,3 +19,5 @@ matplotlib
 # Testing
 pytest
 pytest-cov
+httpx
+python-multipart
