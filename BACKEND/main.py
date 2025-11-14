@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from routes.predict import router as predict_router
-from core.database import Base, engine
-from models import predictions
+from BACKEND.routes.predict import router as predict_router
+from BACKEND.core.database import Base, engine
+from BACKEND.models import predictions
 
 # Create DB tables
 Base.metadata.create_all(bind=engine)

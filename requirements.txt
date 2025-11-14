@@ -1,0 +1,21 @@
+# Web Framework
+fastapi
+uvicorn[standard]
+
+# Database
+sqlalchemy
+psycopg2-binary
+python-dotenv
+
+# Machine Learning / Computer Vision
+tensorflow
+opencv-python
+numpy
+pillow
+
+# Data Visualization
+matplotlib
+
+# Testing
+pytest
+pytest-cov

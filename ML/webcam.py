@@ -24,10 +24,15 @@ cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 if not cap.isOpened():
     raise Exception("❌ Impossible d'accéder à la webcam.")
 
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+# --- Meilleure résolution possible (Full HD) ---
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
-print("🎥 Webcam activée — appuyez sur 'q' pour quitter")
+# Vérifier la résolution effective
+width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+print(f"🎥 Webcam activée — Résolution : {width}x{height}")
+print("Appuyez sur 'q' pour quitter")
 
 # === Variables pour FPS & stabilité ===
 prev_time = 0
@@ -49,8 +54,9 @@ while True:
         print("⚠️ Erreur de lecture du flux vidéo.")
         break
 
-    # Réduire la taille du frame pour de meilleures performances
-    frame = cv2.resize(frame, (640, 480))
+    # Retourner le frame horizontalement (plus naturel pour la webcam)
+    frame = cv2.flip(frame, 1)
+
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # === Détecter les visages ===
@@ -83,13 +89,14 @@ while True:
 
         # === Dessiner le rectangle ===
         color = get_bar_color(avg_conf)
-        cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
-        cv2.putText(frame, label_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+        cv2.rectangle(frame, (x, y), (x+w, y+h), color, 3)
+        cv2.putText(frame, label_text, (x, y - 15),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, color, 3)
 
         # === Barre de confiance ===
         bar_width = int((avg_conf / 100) * w)
-        cv2.rectangle(frame, (x, y + h + 10), (x + bar_width, y + h + 30), color, -1)
-        cv2.rectangle(frame, (x, y + h + 10), (x + w, y + h + 30), (255, 255, 255), 2)
+        cv2.rectangle(frame, (x, y + h + 20), (x + bar_width, y + h + 40), color, -1)
+        cv2.rectangle(frame, (x, y + h + 20), (x + w, y + h + 40), (255, 255, 255), 2)
 
     # === Calcul des FPS ===
     current_time = time.time()
@@ -97,14 +104,17 @@ while True:
     prev_time = current_time
 
     # === Overlay infos ===
-    cv2.putText(frame, f"FPS: {fps:.1f}", (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
+    cv2.putText(frame, f"FPS: {fps:.1f}", (20, 40),
+                cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 0), 3)
 
-    if faces is not None and len(faces) > 0:
-        cv2.putText(frame, f"Emotion: {emotion_display}", (10, 70),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
-        cv2.putText(frame, f"Confiance: {conf_display:.1f}%", (10, 100),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+    if len(faces) > 0:
+        cv2.putText(frame, f"Emotion: {emotion_display}", (20, 90),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 3)
+        cv2.putText(frame, f"Confiance: {conf_display:.1f}%", (20, 130),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 3)
+    else:
+        cv2.putText(frame, "No face detected", (20, 90),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
 
     # === Affichage ===
     cv2.imshow("🧠 Détection des émotions (Appuyez sur 'q' pour quitter)", frame)
